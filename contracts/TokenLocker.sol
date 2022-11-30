@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.12;
 
-
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -11,52 +10,54 @@ contract TokenLocker is Ownable {
     struct LockInfo {
         uint128 amount;
         uint128 claimedAmount;
-        uint64 lockTimestamp; 
+        uint64 lockTimestamp;
         uint64 lastUpdated;
         uint32 lockHours;
     }
     address immutable token;
-    mapping (address => LockInfo) public lockData;
+    mapping(address => LockInfo) public lockData;
+
     constructor(address _token) {
         token = _token;
     }
-    function getToken() external view returns(address) {
+
+    function getToken() external view returns (address) {
         return token;
     }
+
     function emergencyWithdraw(address _tokenAddress) external onlyOwner {
         require(_tokenAddress != address(0), "Token address is invalid");
         IERC20(_tokenAddress).transfer(msg.sender, IERC20(_tokenAddress).balanceOf(address(this)));
     }
-	function getLockData(address _user) external view returns(uint128, uint128, uint64, uint64, uint32) {
+
+    function getLockData(address _user) external view returns (uint128, uint128, uint64, uint64, uint32) {
         require(_user != address(0), "User address is invalid");
         LockInfo storage _lockInfo = lockData[_user];
-		return (
-		    _lockInfo.amount, 
-		    _lockInfo.claimedAmount, 
-		    _lockInfo.lockTimestamp, 
-		    _lockInfo.lastUpdated, 
-		    _lockInfo.lockHours);
-	}
+        return (
+            _lockInfo.amount,
+            _lockInfo.claimedAmount,
+            _lockInfo.lockTimestamp,
+            _lockInfo.lastUpdated,
+            _lockInfo.lockHours
+        );
+    }
+
     function sendLockTokenMany(
-        address[] calldata _users, 
-        uint128[] calldata _amounts, 
+        address[] calldata _users,
+        uint128[] calldata _amounts,
         uint32[] calldata _lockHours,
         uint256 _sendAmount
     ) external onlyOwner {
         require(_users.length == _amounts.length, "array length not eq");
         require(_users.length == _lockHours.length, "array length not eq");
-        require(_sendAmount > 0 , "Amount is invalid");
+        require(_sendAmount > 0, "Amount is invalid");
         IERC20(token).transferFrom(msg.sender, address(this), _sendAmount);
         for (uint256 j = 0; j < _users.length; j++) {
             sendLockToken(_users[j], _amounts[j], uint64(block.timestamp), _lockHours[j]);
         }
     }
-    function sendLockToken(
-        address _user, 
-        uint128 _amount, 
-        uint64 _lockTimestamp, 
-        uint32 _lockHours
-    ) internal {
+
+    function sendLockToken(address _user, uint128 _amount, uint64 _lockTimestamp, uint32 _lockHours) internal {
         require(_amount > 0, "amount can not zero");
         require(_lockHours > 0, "lock hours need more than zero");
         require(_lockTimestamp > 0, "lock timestamp need more than zero");
@@ -70,6 +71,7 @@ contract TokenLocker is Ownable {
         });
         lockData[_user] = lockinfo;
     }
+
     function claimToken(uint128 _amount) external returns (uint256) {
         require(_amount > 0, "Invalid parameter amount");
         address _user = msg.sender;
@@ -88,7 +90,8 @@ contract TokenLocker is Ownable {
         available = available.sub(_lockInfo.claimedAmount);
         require(available > 0, "not available claim");
         uint256 claim = _amount;
-        if (_amount > available) { // claim as much as possible
+        if (_amount > available) {
+            // claim as much as possible
             claim = available;
         }
         _lockInfo.claimedAmount = uint128(uint256(_lockInfo.claimedAmount).add(claim));
