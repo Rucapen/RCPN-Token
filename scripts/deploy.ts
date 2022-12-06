@@ -12,7 +12,7 @@ async function main() {
     const TokenLocker = await ethers.getContractFactory("TokenLocker");
     const tokenLocker = await TokenLocker.deploy(rucapenCoin.address);
     await tokenLocker.deployed();
-    console.log("Rucapen Coin Deployed to: ", rucapenCoin.address);
+    console.log("Token Locker Deployed to: ", tokenLocker.address);
 }
 
 main()
