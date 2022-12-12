@@ -7,21 +7,19 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract RucapenCoin is Initializable, ERC20Upgradeable, OwnableUpgradeable, UUPSUpgradeable {
-	/// @custom:oz-upgrades-unsafe-allow constructor
+    /// @custom:oz-upgrades-unsafe-allow constructor
 
-	uint256 public maxSupply = 1_000_000_000 * 10 ** decimals();
+    constructor() {
+        _disableInitializers();
+    }
 
-	constructor() {
-		_disableInitializers();
-	}
+    function initialize() public initializer {
+        __ERC20_init("RucapenCoin", "RCPN");
+        __Ownable_init();
+        __UUPSUpgradeable_init();
 
-	function initialize() public initializer {
-		__ERC20_init("RucapenCoin", "RCPN");
-		__Ownable_init();
-		__UUPSUpgradeable_init();
+        _mint(msg.sender, 1_000_000_000 * 10 ** decimals());
+    }
 
-		_mint(msg.sender, maxSupply);
-	}
-
-	function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 }
