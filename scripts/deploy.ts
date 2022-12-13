@@ -3,15 +3,17 @@ import { ethers, network, upgrades } from "hardhat";
 
 /// deploy AssetVault
 async function main() {
+  console.log(`\n Deploying Rucapen Coin on ${network.name}`);
   const RucapenCoin = await ethers.getContractFactory("RucapenCoin");
   const rucapenCoin = await upgrades.deployProxy(RucapenCoin, []);
   await rucapenCoin.deployed();
-  console.log(`Rucapen Coin Deployed to: ${rucapenCoin.address} on ${network.name}`);
+  console.log(`Successfully deployed to: ${rucapenCoin.address} \n`);
 
+  console.log(`Deploying AssetVault on ${network.name}`);
   const TokenLocker = await ethers.getContractFactory("TokenLocker");
   const tokenLocker = await TokenLocker.deploy(rucapenCoin.address);
   await tokenLocker.deployed();
-  console.log(`Token Locker Deployed to: ${tokenLocker.address} on ${network.name}`);
+  console.log(`Successfully deployed to: ${tokenLocker.address} \n`);
 }
 
 main()
